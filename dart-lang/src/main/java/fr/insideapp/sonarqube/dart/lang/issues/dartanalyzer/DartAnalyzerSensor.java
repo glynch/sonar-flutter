@@ -18,10 +18,10 @@
 package fr.insideapp.sonarqube.dart.lang.issues.dartanalyzer;
 
 import fr.insideapp.sonarqube.dart.lang.Dart;
+import fr.insideapp.sonarqube.dart.lang.InputFileResolver;
 import fr.insideapp.sonarqube.dart.lang.PubSpec;
 import fr.insideapp.sonarqube.dart.lang.PubSpecParser;
 import fr.insideapp.sonarqube.dart.lang.issues.dartanalyzer.executable.AnalyzerExecutable;
-import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.sensor.Sensor;
@@ -37,7 +37,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 import static java.util.Arrays.asList;
 
@@ -91,11 +90,11 @@ public class DartAnalyzerSensor implements Sensor {
             File file = sensorContext.fileSystem().resolvePath(issue.getFilePath());
             LOGGER.debug("Recording issue for {}", file.getAbsolutePath());
 
-            FilePredicate fp = sensorContext.fileSystem().predicates().hasAbsolutePath(file.getAbsolutePath());
-            if (!sensorContext.fileSystem().hasFiles(fp)) {
+            InputFile inputFile = InputFileResolver.resolve(sensorContext.fileSystem(), issue.getFilePath())
+                    .orElse(null);
+            if (inputFile == null) {
                 LOGGER.warn("File not included in SonarQube {}", file.getAbsoluteFile());
             } else {
-                final InputFile inputFile = Objects.requireNonNull(sensorContext.fileSystem().inputFile(fp));
                 NewIssue newIssue = sensorContext.newIssue()
                         .forRule(RuleKey.of(DartAnalyzerRulesDefinition.REPOSITORY_KEY, issue.getRuleId().toLowerCase(Locale.ROOT)));
                 newIssue.at(issue.toNewIssueLocationFor(newIssue, inputFile))

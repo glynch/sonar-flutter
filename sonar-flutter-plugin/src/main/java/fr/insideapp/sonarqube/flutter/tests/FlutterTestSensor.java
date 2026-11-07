@@ -18,6 +18,7 @@
 package fr.insideapp.sonarqube.flutter.tests;
 
 import fr.insideapp.sonarqube.dart.lang.Dart;
+import fr.insideapp.sonarqube.dart.lang.InputFileResolver;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.measure.Metric;
 import org.sonar.api.batch.sensor.Sensor;
@@ -70,7 +71,8 @@ public class FlutterTestSensor implements Sensor {
 
     private void saveSuite(FlutterUnitTestSuite suite, SensorContext sensorContext) {
 
-        InputFile inputFile = sensorContext.fileSystem().inputFile(sensorContext.fileSystem().predicates().hasAbsolutePath(suite.getPath()));
+        InputFile inputFile = InputFileResolver.resolve(sensorContext.fileSystem(), suite.getPath())
+                .orElse(null);
 
         if (inputFile == null) {
             LOGGER.error("Unable to find test file {}", suite.getPath());

@@ -29,8 +29,8 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.rule.RuleKey;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
@@ -42,7 +42,7 @@ import java.util.Objects;
 import static java.util.Arrays.asList;
 
 public class DartAnalyzerSensor implements Sensor {
-    private static final Logger LOGGER = Loggers.get(DartAnalyzerSensor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DartAnalyzerSensor.class);
 
     public static final String ANALYZER_MODE = "sonar.dart.analyzer.mode";
     public static final List<AnalyzerExecutable.Mode> ANALYZER_MODE_OPTIONS = asList(AnalyzerExecutable.Mode.values());

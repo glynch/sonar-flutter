@@ -30,7 +30,7 @@ import fr.insideapp.sonarqube.flutter.tests.FlutterTestSensor;
 import org.sonar.api.Plugin;
 import org.sonar.api.PropertyType;
 import org.sonar.api.config.PropertyDefinition;
-import org.sonar.api.resources.Qualifiers;
+import org.sonar.api.config.PropertyDefinition.ConfigScope;
 
 import java.util.stream.Collectors;
 
@@ -59,7 +59,7 @@ public class FlutterPlugin implements Plugin {
                         .multiValues(true)
                         .category(DART_CATEGORY)
                         .subCategory(GENERAL_SUBCATEGORY)
-                        .onQualifiers(Qualifiers.PROJECT)
+                        .onConfigScopes(ConfigScope.PROJECT)
                         .defaultValue(String.join(",", Dart.FILE_SUFFIXES))
                         .build());
 
@@ -73,7 +73,7 @@ public class FlutterPlugin implements Plugin {
                 PropertyDefinition.builder(FLUTTER_TESTS_REPORT_PATH_KEY)
                         .name("Unit Test Report")
                         .description("Path to Flutter unit test execution report file. The path may be either absolute or relative to the project base directory.")
-                        .onQualifiers(Qualifiers.PROJECT)
+                        .onConfigScopes(ConfigScope.PROJECT)
                         .category(FLUTTER_CATEGORY)
                         .subCategory(TESTS_SUBCATEGORY)
                         .build());
@@ -82,7 +82,7 @@ public class FlutterPlugin implements Plugin {
                 PropertyDefinition.builder(FLUTTER_LCOV_REPORT_PATH_KEY)
                         .name("Coverage Report")
                         .description("Path to Flutter coverage report file. The path may be either absolute or relative to the project base directory.")
-                        .onQualifiers(Qualifiers.PROJECT)
+                        .onConfigScopes(ConfigScope.PROJECT)
                         .category(FLUTTER_CATEGORY)
                         .subCategory(TESTS_SUBCATEGORY)
                         .build());
@@ -91,7 +91,7 @@ public class FlutterPlugin implements Plugin {
                 PropertyDefinition.builder(DartAnalyzerSensor.ANALYZER_OPTIONS_OVERRIDE)
                         .name("Override existing analysis_options file")
                         .description("The SonarQube plugin for Flutter/Dart uses its own analysis_options file, even if it exists under the project/module root. If you want to use the existing analysis_options file instead, set the value to false.")
-                        .onQualifiers(Qualifiers.PROJECT)
+                        .onConfigScopes(ConfigScope.PROJECT)
                         .category(DART_CATEGORY)
                         .subCategory(ANALYSIS_SUBCATEGORY)
                         .defaultValue(DartAnalyzerSensor.ANALYZER_OPTIONS_OVERRIDE_DEFAULT)
@@ -101,7 +101,7 @@ public class FlutterPlugin implements Plugin {
                 PropertyDefinition.builder(DartAnalyzerSensor.ANALYZER_MODE)
                         .name("Analyzer")
                         .description("Which analyzer to use. If Dart 2.12+ is used, it is safe to leave on DETECT, otherwise manual configuration may be needed.")
-                        .onQualifiers(Qualifiers.PROJECT)
+                        .onConfigScopes(ConfigScope.PROJECT)
                         .category(DART_CATEGORY)
                         .subCategory(ANALYSIS_SUBCATEGORY)
                         .options(DartAnalyzerSensor.ANALYZER_MODE_OPTIONS.stream().map(Enum::name).collect(Collectors.toList()))
@@ -113,7 +113,7 @@ public class FlutterPlugin implements Plugin {
                 PropertyDefinition.builder(DartAnalyzerSensor.ANALYZER_REPORT_PATH)
                         .name("Use existing report file for analysis")
                         .description("Path to analysis report file. Only evaluated when the analyzer is set to MANUAL.")
-                        .onQualifiers(Qualifiers.PROJECT)
+                        .onConfigScopes(ConfigScope.PROJECT)
                         .category(DART_CATEGORY)
                         .subCategory(ANALYSIS_SUBCATEGORY)
                         .build());
@@ -123,7 +123,7 @@ public class FlutterPlugin implements Plugin {
                 PropertyDefinition.builder(DartAnalyzerSensor.ANALYZER_OUTPUT_MODE)
                         .name("Analyzer output format")
                         .description("This needs to be configured if the analyzer is set to MANUAL. If Dart 2.12+ is used, it is safe to leave on DETECT, otherwise manual configuration may also be needed.")
-                        .onQualifiers(Qualifiers.PROJECT)
+                        .onConfigScopes(ConfigScope.PROJECT)
                         .category(DART_CATEGORY)
                         .subCategory(ANALYSIS_SUBCATEGORY)
                         .options(DartAnalyzerSensor.ANALYZER_OUTPUT_MODE_OPTIONS.stream().map(Enum::name).collect(Collectors.toList()))

@@ -7,21 +7,26 @@ readonly PLUGIN_JAR="${PLUGIN_JAR:-sonar-flutter-plugin/target/sonar-flutter-plu
 readonly CONTAINER_NAME="sonar-flutter-smoke-$$"
 readonly STARTUP_TIMEOUT_SECONDS="${STARTUP_TIMEOUT_SECONDS:-180}"
 readonly ADMIN_CREDENTIALS="admin:admin"
-readonly PROJECT_KEY="sonar-flutter-dart-coverage"
-readonly FIXTURE_DIR="${FIXTURE_DIR:-tools/fixtures/dart-coverage}"
+readonly DART_PROJECT_KEY="sonar-flutter-dart-coverage"
+readonly DART_FIXTURE_DIR="${DART_FIXTURE_DIR:-tools/fixtures/dart-coverage}"
 readonly DART_EXECUTABLE="${DART_EXECUTABLE:-dart}"
 readonly EXPECTED_DART_VERSION="${EXPECTED_DART_VERSION:-3.13.7}"
+readonly FLUTTER_PROJECT_KEY="sonar-flutter-integration"
+readonly FLUTTER_FIXTURE_DIR="${FLUTTER_FIXTURE_DIR:-tools/fixtures/flutter}"
+readonly FLUTTER_EXECUTABLE="${FLUTTER_EXECUTABLE:-flutter}"
+readonly EXPECTED_FLUTTER_VERSION="${EXPECTED_FLUTTER_VERSION:-3.47.9}"
 
 container_started=false
-scanner_work_dir=""
+temporary_directories=()
 
 cleanup() {
   if [[ "${container_started}" == "true" ]]; then
     docker rm --force "${CONTAINER_NAME}" >/dev/null 2>&1 || true
   fi
-  if [[ -n "${scanner_work_dir}" && -d "${scanner_work_dir}" ]]; then
-    rm -rf -- "${scanner_work_dir}"
-  fi
+  local temporary_directory
+  for temporary_directory in "${temporary_directories[@]}"; do
+    [[ -d "${temporary_directory}" ]] && rm -rf -- "${temporary_directory}"
+  done
 }
 
 fail() {
@@ -98,11 +103,12 @@ sonarqube_base_url() {
 
 generate_analysis_token() {
   local base_url="$1"
+  local token_name="$2"
   local response
 
   response="$(curl --fail --silent --user "${ADMIN_CREDENTIALS}" \
     --request POST \
-    --data-urlencode "name=sonar-flutter-smoke-$$" \
+    --data-urlencode "name=${token_name}" \
     "${base_url}/api/user_tokens/generate")" \
     || fail "Unable to generate an analysis token"
   jq --exit-status --raw-output '.token | select(length > 0)' <<<"${response}" \
@@ -138,7 +144,7 @@ wait_for_analysis() {
   fail "Analysis task ${task_id} did not finish within ${STARTUP_TIMEOUT_SECONDS} seconds"
 }
 
-assert_analysis_results() {
+assert_dart_analysis_results() {
   local base_url="$1"
   local analysis_token="$2"
   local components
@@ -148,7 +154,7 @@ assert_analysis_results() {
 
   components="$(curl --fail --silent --user "${analysis_token}:" \
     --get \
-    --data-urlencode "component=${PROJECT_KEY}" \
+    --data-urlencode "component=${DART_PROJECT_KEY}" \
     --data-urlencode "qualifiers=FIL" \
     "${base_url}/api/components/tree")" \
     || fail "Unable to query analysed files"
@@ -185,7 +191,7 @@ assert_analysis_results() {
 
   issues="$(curl --fail --silent --user "${analysis_token}:" \
     --get \
-    --data-urlencode "componentKeys=${PROJECT_KEY}" \
+    --data-urlencode "componentKeys=${DART_PROJECT_KEY}" \
     --data-urlencode "rules=dartanalyzer:avoid_print" \
     "${base_url}/api/issues/search")" \
     || fail "Unable to query imported Dart analyzer issues"
@@ -215,16 +221,18 @@ run_dart_analyzer() {
     || fail "Dart analyzer did not report the expected avoid_print finding"
 }
 
-run_fixture_analysis() {
+run_dart_fixture_analysis() {
   local base_url="$1"
   local fixture_dir="$2"
   local analysis_token
   local analyzer_report
+  local scanner_work_dir
   local sonar_work_dir
   local task_id
 
-  analysis_token="$(generate_analysis_token "${base_url}")"
-  scanner_work_dir="$(mktemp -d "${TMPDIR:-/tmp}/sonar-flutter-e2e.XXXXXX")"
+  analysis_token="$(generate_analysis_token "${base_url}" "sonar-flutter-dart-smoke-$$")"
+  scanner_work_dir="$(mktemp -d "${TMPDIR:-/tmp}/sonar-flutter-dart-e2e.XXXXXX")"
+  temporary_directories+=("${scanner_work_dir}")
   analyzer_report="${scanner_work_dir}/dart-analyzer-machine.txt"
   sonar_work_dir="${scanner_work_dir}/scanner"
   run_dart_analyzer "${fixture_dir}" "${analyzer_report}"
@@ -232,7 +240,7 @@ run_fixture_analysis() {
   sonar-scanner \
     -Dsonar.host.url="${base_url}" \
     -Dsonar.token="${analysis_token}" \
-    -Dsonar.projectKey="${PROJECT_KEY}" \
+    -Dsonar.projectKey="${DART_PROJECT_KEY}" \
     -Dsonar.projectName="Sonar Flutter Dart coverage fixture" \
     -Dsonar.projectBaseDir="${fixture_dir}" \
     -Dsonar.working.directory="${sonar_work_dir}" \
@@ -252,7 +260,165 @@ run_fixture_analysis() {
   [[ -n "${task_id}" ]] || fail "SonarScanner did not report a compute-engine task ID"
 
   wait_for_analysis "${base_url}" "${analysis_token}" "${task_id}"
-  assert_analysis_results "${base_url}" "${analysis_token}"
+  assert_dart_analysis_results "${base_url}" "${analysis_token}"
+}
+
+assert_flutter_version() {
+  local version
+
+  version="$("${FLUTTER_EXECUTABLE}" --version 2>&1)" \
+    || fail "Unable to run Flutter executable: ${FLUTTER_EXECUTABLE}"
+  grep -Fq "Flutter ${EXPECTED_FLUTTER_VERSION}" <<<"${version}" \
+    || fail "Expected Flutter ${EXPECTED_FLUTTER_VERSION}, found: ${version}"
+}
+
+assert_flutter_analysis_results() {
+  local base_url="$1"
+  local analysis_token="$2"
+  local components
+  local greeting_key
+  local issues
+  local measures
+  local test_measures
+
+  components="$(curl --fail --silent --user "${analysis_token}:" \
+    --get \
+    --data-urlencode "component=${FLUTTER_PROJECT_KEY}" \
+    --data-urlencode "ps=500" \
+    "${base_url}/api/components/tree")" \
+    || fail "Unable to query analysed Flutter files"
+  jq --exit-status \
+    '.components[] | select(.path == "lib/greeting.dart" and .language == "dart")' \
+    <<<"${components}" >/dev/null \
+    || fail "The Flutter source was not indexed as Dart"
+  jq --exit-status \
+    '.components[] | select(.path == "test/greeting_test.dart" and .language == "dart")' \
+    <<<"${components}" >/dev/null \
+    || fail "The Flutter test was not indexed as Dart"
+  greeting_key="$(jq --raw-output \
+    '.components[] | select(.path == "lib/greeting.dart") | .key' <<<"${components}")"
+  [[ -n "${greeting_key}" ]] || fail "Unable to determine the Flutter source component key"
+
+  measures="$(curl --fail --silent --user "${analysis_token}:" \
+    --get \
+    --data-urlencode "component=${greeting_key}" \
+    --data-urlencode "metricKeys=coverage,line_coverage,lines_to_cover,uncovered_lines" \
+    "${base_url}/api/measures/component")" \
+    || fail "Unable to query Flutter coverage measures"
+  jq --exit-status \
+    '.component.measures | any(.metric == "lines_to_cover" and (.value | tonumber) == 3)' \
+    <<<"${measures}" >/dev/null \
+    || fail "Expected three Flutter lines to cover"
+  jq --exit-status \
+    '.component.measures | any(.metric == "uncovered_lines" and (.value | tonumber) == 0)' \
+    <<<"${measures}" >/dev/null \
+    || fail "Expected no uncovered Flutter lines"
+  jq --exit-status \
+    '.component.measures | any(.metric == "line_coverage" and (.value | tonumber) == 100)' \
+    <<<"${measures}" >/dev/null \
+    || fail "Expected Flutter line coverage of 100 percent"
+
+  issues="$(curl --fail --silent --user "${analysis_token}:" \
+    --get \
+    --data-urlencode "componentKeys=${FLUTTER_PROJECT_KEY}" \
+    --data-urlencode "rules=dartanalyzer:avoid_print" \
+    "${base_url}/api/issues/search")" \
+    || fail "Unable to query imported Flutter analyzer issues"
+  jq --exit-status \
+    '.total == 1 and (.issues[0].component | endswith(":lib/greeting.dart")) and .issues[0].line == 8' \
+    <<<"${issues}" >/dev/null \
+    || fail "Expected one avoid_print issue on greeting.dart line 8"
+
+  test_measures="$(curl --fail --silent --user "${analysis_token}:" \
+    --get \
+    --data-urlencode "component=${FLUTTER_PROJECT_KEY}" \
+    --data-urlencode "metricKeys=tests,test_errors,test_failures,skipped_tests,test_execution_time" \
+    "${base_url}/api/measures/component")" \
+    || fail "Unable to query Flutter test measures"
+  jq --exit-status \
+    '.component.measures | any(.metric == "tests" and (.value | tonumber) == 1)' \
+    <<<"${test_measures}" >/dev/null \
+    || fail "Expected one imported Flutter test"
+  jq --exit-status \
+    '.component.measures | any(.metric == "test_errors" and (.value | tonumber) == 0)' \
+    <<<"${test_measures}" >/dev/null \
+    || fail "Expected no Flutter test errors"
+  jq --exit-status \
+    '.component.measures | any(.metric == "test_failures" and (.value | tonumber) == 0)' \
+    <<<"${test_measures}" >/dev/null \
+    || fail "Expected no Flutter test failures"
+  jq --exit-status \
+    '.component.measures | any(.metric == "skipped_tests" and (.value | tonumber) == 0)' \
+    <<<"${test_measures}" >/dev/null \
+    || fail "Expected no skipped Flutter tests"
+  jq --exit-status \
+    '.component.measures | any(.metric == "test_execution_time" and (.value | tonumber) > 0)' \
+    <<<"${test_measures}" >/dev/null \
+    || fail "Expected a positive Flutter test execution time"
+}
+
+run_flutter_fixture_analysis() {
+  local base_url="$1"
+  local fixture_dir="$2"
+  local analysis_token
+  local analyzer_report
+  local flutter_bin_dir
+  local flutter_project_dir
+  local flutter_work_dir
+  local sonar_work_dir
+  local task_id
+
+  analysis_token="$(generate_analysis_token "${base_url}" "sonar-flutter-integration-smoke-$$")"
+  flutter_work_dir="$(mktemp -d "${TMPDIR:-/tmp}/sonar-flutter-integration.XXXXXX")"
+  temporary_directories+=("${flutter_work_dir}")
+  flutter_project_dir="${flutter_work_dir}/project"
+  sonar_work_dir="${flutter_work_dir}/scanner"
+  analyzer_report="${flutter_work_dir}/flutter-analyzer.txt"
+  mkdir -p "${flutter_project_dir}"
+  cp -R "${fixture_dir}/." "${flutter_project_dir}/"
+
+  (cd "${flutter_project_dir}" && "${FLUTTER_EXECUTABLE}" pub get)
+  (cd "${flutter_project_dir}" && \
+    "${FLUTTER_EXECUTABLE}" analyze --no-fatal-warnings --no-fatal-infos) \
+    >"${analyzer_report}" 2>&1 || true
+  grep -Eq \
+    'info.*avoid_print' \
+    "${analyzer_report}" \
+    || fail "Flutter analyzer did not report the expected avoid_print finding"
+  (cd "${flutter_project_dir}" && \
+    "${FLUTTER_EXECUTABLE}" test --machine --coverage) \
+    >"${flutter_project_dir}/tests.output" \
+    || fail "Flutter fixture tests failed"
+  [[ -f "${flutter_project_dir}/coverage/lcov.info" ]] \
+    || fail "Flutter did not generate an LCOV report"
+  grep -Fq '"name":"shows the greeting"' "${flutter_project_dir}/tests.output" \
+    || fail "Flutter machine test output does not contain the expected test"
+
+  flutter_bin_dir="$(cd "$(dirname "$(command -v "${FLUTTER_EXECUTABLE}")")" && pwd)"
+  PATH="${flutter_bin_dir}:${PATH}" sonar-scanner \
+    -Dsonar.host.url="${base_url}" \
+    -Dsonar.token="${analysis_token}" \
+    -Dsonar.projectKey="${FLUTTER_PROJECT_KEY}" \
+    -Dsonar.projectName="Sonar Flutter integration fixture" \
+    -Dsonar.projectBaseDir="${flutter_project_dir}" \
+    -Dsonar.working.directory="${sonar_work_dir}" \
+    -Dsonar.sources="lib,pubspec.yaml" \
+    -Dsonar.tests=test \
+    -Dsonar.sourceEncoding=UTF-8 \
+    -Dsonar.scm.disabled=true \
+    -Dsonar.dart.analyzer.mode=FLUTTER \
+    -Dsonar.dart.analyzer.report.mode=LEGACY \
+    -Dsonar.dart.analyzer.options.override=false \
+    -Dsonar.flutter.tests.reportPath="${flutter_project_dir}/tests.output" \
+    -Dsonar.flutter.coverage.reportPath="${flutter_project_dir}/coverage/lcov.info"
+
+  [[ -f "${sonar_work_dir}/report-task.txt" ]] \
+    || fail "SonarScanner did not create the Flutter report-task.txt"
+  task_id="$(awk -F= '$1 == "ceTaskId" {print $2}' "${sonar_work_dir}/report-task.txt")"
+  [[ -n "${task_id}" ]] || fail "SonarScanner did not report a Flutter compute-engine task ID"
+
+  wait_for_analysis "${base_url}" "${analysis_token}" "${task_id}"
+  assert_flutter_analysis_results "${base_url}" "${analysis_token}"
 }
 
 require_command curl
@@ -261,8 +427,10 @@ require_command jq
 require_command mvn
 require_command sonar-scanner
 require_command "${DART_EXECUTABLE}"
+require_command "${FLUTTER_EXECUTABLE}"
 
 assert_dart_version
+assert_flutter_version
 
 trap cleanup EXIT INT TERM
 
@@ -272,8 +440,10 @@ mvn --quiet clean package
 [[ -f "${PLUGIN_JAR}" ]] || fail "Plugin JAR not found: ${PLUGIN_JAR}"
 PLUGIN_JAR_ABSOLUTE="$(cd "$(dirname "${PLUGIN_JAR}")" && pwd)/$(basename "${PLUGIN_JAR}")"
 readonly PLUGIN_JAR_ABSOLUTE
-FIXTURE_DIR_ABSOLUTE="$(cd "${FIXTURE_DIR}" && pwd)"
-readonly FIXTURE_DIR_ABSOLUTE
+DART_FIXTURE_DIR_ABSOLUTE="$(cd "${DART_FIXTURE_DIR}" && pwd)"
+readonly DART_FIXTURE_DIR_ABSOLUTE
+FLUTTER_FIXTURE_DIR_ABSOLUTE="$(cd "${FLUTTER_FIXTURE_DIR}" && pwd)"
+readonly FLUTTER_FIXTURE_DIR_ABSOLUTE
 
 printf 'Starting isolated SonarQube container %s...\n' "${CONTAINER_NAME}"
 docker run --detach \
@@ -298,6 +468,9 @@ assert_plugin_loaded "${BASE_URL}"
 assert_no_known_startup_failure
 
 printf 'Analysing Dart coverage fixture...\n'
-run_fixture_analysis "${BASE_URL}" "${FIXTURE_DIR_ABSOLUTE}"
+run_dart_fixture_analysis "${BASE_URL}" "${DART_FIXTURE_DIR_ABSOLUTE}"
 
-printf 'SonarQube 26.10 plugin, Dart analyzer and coverage smoke test passed.\n'
+printf 'Analysing Flutter integration fixture...\n'
+run_flutter_fixture_analysis "${BASE_URL}" "${FLUTTER_FIXTURE_DIR_ABSOLUTE}"
+
+printf 'SonarQube 26.10 plugin, Dart and Flutter integration smoke test passed.\n'

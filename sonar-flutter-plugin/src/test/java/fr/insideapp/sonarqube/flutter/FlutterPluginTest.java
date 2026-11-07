@@ -19,22 +19,19 @@ package fr.insideapp.sonarqube.flutter;
 
 import org.junit.Test;
 import org.sonar.api.Plugin;
-import org.sonar.api.SonarEdition;
-import org.sonar.api.SonarQubeSide;
 import org.sonar.api.SonarRuntime;
-import org.sonar.api.internal.SonarRuntimeImpl;
-import org.sonar.api.utils.Version;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class FlutterPluginTest {
 
     @Test
     public void define() {
 
-        SonarRuntime sonarRuntime = SonarRuntimeImpl.forSonarQube(Version.create(7, 9), SonarQubeSide.SERVER, SonarEdition.COMMUNITY);
+        SonarRuntime sonarRuntime = mock(SonarRuntime.class);
         Plugin.Context context = new Plugin.Context(sonarRuntime);
 
 

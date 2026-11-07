@@ -17,9 +17,9 @@
  */
 package fr.insideapp.sonarqube.dart.lang;
 
+import com.sonarsource.scanner.engine.sensor.test.fixtures.SensorContextTester;
 import org.junit.Test;
 import org.sonar.api.batch.sensor.SensorContext;
-import org.sonar.api.batch.sensor.internal.SensorContextTester;
 
 import java.io.File;
 import java.io.IOException;

@@ -18,18 +18,22 @@
 package fr.insideapp.sonarqube.dart.lang;
 
 import org.junit.Test;
-import org.sonar.api.batch.sensor.internal.DefaultSensorDescriptor;
+import org.sonar.api.batch.sensor.SensorDescriptor;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class DartSensorTest {
 
     @Test
     public void describe() {
         DartSensor sensor = new DartSensor();
-        DefaultSensorDescriptor descriptor = new DefaultSensorDescriptor();
+        SensorDescriptor descriptor = mock(SensorDescriptor.class);
+        when(descriptor.onlyOnLanguage(Dart.KEY)).thenReturn(descriptor);
+        when(descriptor.name("Dart sensor")).thenReturn(descriptor);
         sensor.describe(descriptor);
-        assertThat(descriptor.name()).isEqualTo("Dart sensor");
+        verify(descriptor).name("Dart sensor");
     }
 
 }

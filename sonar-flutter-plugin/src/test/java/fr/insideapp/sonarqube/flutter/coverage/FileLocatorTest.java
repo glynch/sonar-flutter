@@ -17,9 +17,9 @@
  */
 package fr.insideapp.sonarqube.flutter.coverage;
 
+import com.sonarsource.scanner.engine.sensor.test.fixtures.TestInputFileBuilder;
 import org.junit.Test;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 
 import java.util.Arrays;
 import java.util.Collections;

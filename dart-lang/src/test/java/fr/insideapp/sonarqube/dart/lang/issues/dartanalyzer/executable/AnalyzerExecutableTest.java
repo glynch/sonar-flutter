@@ -17,10 +17,10 @@
  */
 package fr.insideapp.sonarqube.dart.lang.issues.dartanalyzer.executable;
 
+import com.sonarsource.scanner.engine.sensor.test.fixtures.SensorContextTester;
 import fr.insideapp.sonarqube.dart.lang.issues.dartanalyzer.AnalyzerOutput;
 import org.junit.Test;
 import org.sonar.api.batch.sensor.SensorContext;
-import org.sonar.api.batch.sensor.internal.SensorContextTester;
 
 import java.io.File;
 

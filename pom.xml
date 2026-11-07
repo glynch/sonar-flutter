@@ -55,10 +55,11 @@
         <license.mailto>contact@insideapp.fr</license.mailto>
 
         <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
-        <jdk.min.version>1.9</jdk.min.version>
+        <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <sonar.version>7.9</sonar.version>
+        <sonar.plugin.api.version>14.1.0.5543</sonar.plugin.api.version>
+        <sonar.scanner.engine.version>13.15.0.6376</sonar.scanner.engine.version>
 
         <assertj.version>3.5.2</assertj.version>
         <junit.version>4.13.1</junit.version>
@@ -81,9 +82,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.sonarsource.sonarqube</groupId>
+            <groupId>org.sonarsource.api.plugin</groupId>
             <artifactId>sonar-plugin-api</artifactId>
-            <version>${sonar.version}</version>
+            <version>${sonar.plugin.api.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -147,9 +148,9 @@
 
         <!-- Test dependencies -->
         <dependency>
-            <groupId>org.sonarsource.sonarqube</groupId>
-            <artifactId>sonar-testing-harness</artifactId>
-            <version>${sonar.version}</version>
+            <groupId>org.sonarsource.scanner.engine</groupId>
+            <artifactId>sensor-test-fixtures</artifactId>
+            <version>${sonar.scanner.engine.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -185,10 +186,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.14.1</version>
                 <configuration>
-                    <source>${jdk.min.version}</source>
-                    <target>${jdk.min.version}</target>
+                    <release>${maven.compiler.release}</release>
                     <compilerArgs>
                         <arg>-Xlint</arg>
                     </compilerArgs>
@@ -198,7 +198,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.5</version>
+                <version>0.8.16</version>
                 <configuration>
                     <excludes>
                         <exclude>**/generated/**</exclude>

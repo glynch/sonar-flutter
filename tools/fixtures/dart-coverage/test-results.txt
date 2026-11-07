@@ -1,0 +1,1 @@
+No tests in this coverage-only fixture.

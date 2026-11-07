@@ -1,0 +1,4 @@
+name: sonar_flutter_coverage_fixture
+
+environment:
+  sdk: ^3.0.0

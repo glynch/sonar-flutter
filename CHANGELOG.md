@@ -1,39 +1,58 @@
 # Changelog
 
+## 0.6.0-riverfold-SNAPSHOT
+
+### Compatibility
+
+- Updated the SonarQube plugin API and scanner test fixtures for SonarQube
+  Community Build 26.10.
+- Verified analysis with Flutter 3.47.9 and Dart 3.13.7.
+
+### Enhancements
+
+- Added disposable SonarQube integration tests for Dart analyzer findings,
+  Flutter analyzer findings, Flutter widget-test metrics and LCOV coverage.
+
+### Bug Fixes
+
+- Replaced SonarQube APIs removed in Community Build 26.10.
+- Resolved canonical-equivalent report paths, including the macOS `/var` and
+  `/private/var` aliases.
+
 ## 0.5.2
 
-#### Breaking
+### Breaking
 
 - None.
 
-#### Experimental
+### Experimental
 
 - None.
 
-#### Enhancements
+### Enhancements
 
 - Analyzer rules update (7 added)
 
-#### Bug Fixes
+### Bug Fixes
 
 - [#187](https://github.com/insideapp-oss/sonar-flutter/issues/187) pubspec.yaml parser fails when no dependencies are declared
 - [#223](https://github.com/insideapp-oss/sonar-flutter/issues/223) some dartanalyzer rules disappeared
 
 ## 0.5.1
 
-#### Breaking
+### Breaking
 
 - None.
 
-#### Experimental
+### Experimental
 
 - None.
 
-#### Enhancements
+### Enhancements
 
 - Analyzer rules update: there are now 279 rules available
 
-#### Bug Fixes
+### Bug Fixes
 
 - [#177](https://github.com/insideapp-oss/sonar-flutter/issues/177) analyzer execution fails when errors detected.
 - [#212](https://github.com/insideapp-oss/sonar-flutter/issues/212) source file not indexed with SonarQube 10.4+
@@ -42,7 +61,7 @@
 
 ## 0.5.0
 
-#### Breaking
+### Breaking
 
 - SonarQube API update to 7.9 for latest LTS support (9.9)
 - Removed `dartanalyzer` implementation that scans each file individual, this may affect projects running on a (pretty) old Dart SDK.
@@ -61,14 +80,14 @@
   - Defaults to automatic detection by parsing the Dart SDK version and defaults to `--format=machine` for Dart when SDK >= 2.12
   - Can be set to legacy mode when using pre-existing analysis report or an older Dart SDK
 
-#### Experimental
+### Experimental
 
 - None.
 
-#### Enhancements
+### Enhancements
 
 - Add a `pubspec.yaml` sensor which adds the file to SonarQube and allow showing lints for this file
-- Add support for multi-module projects (`sonar.modules=mylib,mylib_generator,example`) 
+- Add support for multi-module projects (`sonar.modules=mylib,mylib_generator,example`)
 - Added missing dart keywords and corrected some
   - `try`
   - `hide`
@@ -84,22 +103,21 @@
 - Rules update
 - Better rules description
 
-#### Bug Fixes
+### Bug Fixes
 
 - [#160](https://github.com/insideapp-oss/sonar-flutter/issues/160) dart analysis with an exception of NumberFormatException
 
-
 ## 0.4.0
 
-#### Breaking
+### Breaking
 
 - None.
 
-#### Experimental
+### Experimental
 
 - None.
 
-#### Enhancements
+### Enhancements
 
 - (#65) Support SonarQube 9 - (thanks to @kuhnroyal)
 - (#32) make perfer final issue type to CODE_SMELL - (thanks to @magaofei)
@@ -107,70 +125,69 @@
 - (#66) CI improvements - (thanks to @kuhnroyal)
 - (#56) Update README.md - (thanks to @thiagoloureiro)
 
-#### Bug Fixes
+### Bug Fixes
 
 - None.
 
 ## 0.3.2
 
-#### Breaking
+### Breaking
 
 - None.
 
-#### Experimental
+### Experimental
 
 - None.
 
-#### Enhancements
+### Enhancements
 
 - Allow re-using an existing dartanalyzer report with `sonar.dart.analysis.reportPath` (thanks to [Peter Leibiger](https://github.com/kuhnroyal))
 - Add missing dart keywords `extension`, `on`, `mixin` (thanks to [Peter Leibiger](https://github.com/kuhnroyal))
 - Add pedantic 1.9.0 profile (thanks to [Daniel Morawetz](https://github.com/dmorawetz))
 - Faster analysis with 'flutter analyze' and support for different analysis modes with `sonar.flutter.analyzer.mode` (thanks to [Marc Reichelt](https://github.com/mreichelt))
 
-#### Bug Fixes
+### Bug Fixes
 
 - Ensure analyzer encoding is UTF-8 (thanks to [Daniel Morawetz](https://github.com/dmorawetz))
 
-
 ## 0.3.1
 
-#### Breaking
+### Breaking
 
 - None.
 
-#### Experimental
+### Experimental
 
 - None.
 
-#### Enhancements
+### Enhancements
 
 - Better handling of missing test report file.
 - Faster analysis on large projects (increased analyser page size to 50).
 
-#### Bug Fixes
+### Bug Fixes
 
 - Test report parsing fix for Windows (thanks to [victorgilc](https://github.com/victorgilc)).
 - Removed duplicated issues on the same file.
 
 ## 0.3.0
 
-#### Breaking
+### Breaking
 
 - None.
 
-#### Experimental
+### Experimental
 
 - None.
 
-#### Enhancements
+### Enhancements
 
 - Add Flutter 1.20.0 test report compatibility (thanks to [Peter Leibiger](https://github.com/kuhnroyal)), fixes [#19](https://github.com/insideapp-oss/sonar-flutter/issues/19)
 - Improve test report parsing (thanks to [Peter Leibiger](https://github.com/kuhnroyal)), fixes [#13](https://github.com/insideapp-oss/sonar-flutter/issues/13)
 - Ability to use existing analysis options (configurable behavior) (thanks to [Stephane Janicaud](https://github.com/stephanecodes])), fixes [#23](https://github.com/insideapp-oss/sonar-flutter/issues/23), [#18](https://github.com/insideapp-oss/sonar-flutter/issues/18)
 - Paginated analysis with dartanalyzer (thanks to [victorgilc](https://github.com/victorgilc))
 
-#### Bug Fixes
+### Bug Fixes
 
 - Report the correct test case count (thanks to [Peter Leibiger](https://github.com/kuhnroyal))
 - Better test report parsing (thanks to [victorgilc](https://github.com/victorgilc))
@@ -181,56 +198,56 @@
 
 ## 0.2.1
 
-#### Breaking
+### Breaking
 
 - None.
 
-#### Experimental
+### Experimental
 
 - None.
 
-#### Enhancements
+### Enhancements
 
 - Added diagnostic rules (thanks to [etiennecadicidean](https://github.com/etiennecadicidean))
 
-#### Bug Fixes
+### Bug Fixes
 
 - None
 
 ## 0.2.0
 
-#### Breaking
+### Breaking
 
 - None.
 
-#### Experimental
+### Experimental
 
 - None.
 
-#### Enhancements
+### Enhancements
 
 - Syntax coloration
 - Cyclomatic complexity computation
-- More accurate code line count 
+- More accurate code line count
 
-#### Bug Fixes
+### Bug Fixes
 
 - None
 
 ## 0.1.0
 
-#### Breaking
+### Breaking
 
 - Initial release.
 
-#### Experimental
+### Experimental
 
 - None.
 
-#### Enhancements
+### Enhancements
 
 - None.
 
-#### Bug Fixes
+### Bug Fixes
 
 - None.

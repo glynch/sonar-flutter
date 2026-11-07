@@ -1,19 +1,13 @@
-![CI](https://github.com/insideapp-oss/sonar-flutter/workflows/CI/badge.svg)
-
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=insideapp-oss_sonar-flutter&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=insideapp-oss_sonar-flutter)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=insideapp-oss_sonar-flutter&metric=coverage)](https://sonarcloud.io/summary/new_code?id=insideapp-oss_sonar-flutter)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=insideapp-oss_sonar-flutter&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=insideapp-oss_sonar-flutter)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=insideapp-oss_sonar-flutter&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=insideapp-oss_sonar-flutter)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=insideapp-oss_sonar-flutter&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=insideapp-oss_sonar-flutter)
-
-
 # SonarQube plugin for Flutter / Dart
 
 A plugin to enable analysis of Dart and Flutter projects into SonarQube.
 
-<p style="text-align: center">
-	<img src="screenshots/main.png" alt="main.png" width="80%"/>
-</p>
+This is a Riverfold-maintained fork of the
+[original inside|app plugin](https://github.com/insideapp-fr/sonar-flutter).
+The fork keeps the existing Maven group, Java packages and SonarQube plugin key
+so that functional changes can still be contributed upstream independently.
+
+![SonarQube Flutter plugin dashboard](screenshots/main.png)
 
 ## Features
 
@@ -26,13 +20,21 @@ A plugin to enable analysis of Dart and Flutter projects into SonarQube.
 | Complexity | YES                                                             |
 | Syntax     | YES                                                             |
 
-The plugin is compatible with sonarQube 7.9+.
+The Riverfold fork is verified against SonarQube Community Build 26.10,
+Flutter 3.47.9 and Dart 3.13.7.
 
-## Download
+## Build
 
-Checkout the [Releases](https://github.com/insideapp-oss/sonar-flutter/releases) page.
+Binary releases are not currently published. Build the plugin locally with:
 
-Changelog is available [here](https://github.com/insideapp-oss/sonar-flutter/blob/develop/CHANGELOG.md).
+```shell
+mvn clean package
+```
+
+The plugin JAR is written to
+`sonar-flutter-plugin/target/sonar-flutter-plugin-<version>.jar`.
+
+See the [changelog](CHANGELOG.md) for version history.
 
 ## Prerequisites
 
@@ -54,7 +56,6 @@ Install sonar-scanner as explained in the official documentation.
 
 [Installation instructions](https://docs.sonarqube.org/latest/analysis/scan/sonarscanner/)
 
-
 ## Installation (on the server)
 
 - Download the plugin binary into the **$SONARQUBE_HOME/extensions/plugins** directory.
@@ -69,7 +70,7 @@ Create a **sonar-project.properties** file at the root with this content :
 sonar.projectKey=flutter_rocks
 sonar.projectName=Flutter Rocks
 sonar.projectVersion=1.0
-	
+
 # Source code location.
 # Path is relative to the sonar-project.properties file. Defaults to .
 # Use commas to specify more than one file/folder.
@@ -110,7 +111,7 @@ If `analysis_options.yaml` file already exists under the project root, it will b
 
 To disable this behavior and use the existing`analysis_options.yaml` file instead, add the following line to `sonar-project.properties` file :
 
-```
+```properties
 # Use existing options to perform dartanalyzer analysis
 sonar.dart.analyzer.options.override=true
 ```
@@ -150,7 +151,7 @@ example.sonar.dart.analyzer.report.path=build/reports/analysis-results.txt
 
 ## Run analysis
 
-Use the following commands from the root folder to start an analysis: 
+Use the following commands from the root folder to start an analysis:
 
 ```console
 # Download dependencies 
@@ -167,7 +168,8 @@ sonar-scanner
 ## Using `dart_test.yaml`
 
 Dart/Flutter support the use of a `dart_test.yaml` file to configure test behavior.
-This file can be used to configure the test output format and location. More information can be found [here](https://github.com/dart-lang/test/blob/master/pkgs/test/doc/configuration.md).
+The [Dart test configuration documentation](https://github.com/dart-lang/test/blob/master/pkgs/test/doc/configuration.md)
+explains the available output format and location settings.
 
 ```yaml
 file_reporters:
@@ -177,9 +179,9 @@ file_reporters:
 With this, it is no longer use the `--machine` switch or redirect the output.
 It is currently not possible to configure the coverage out in this file.
 You may follow and upvote these related issue if interested:
-* Configuration option - https://github.com/dart-lang/test/issues/1361
-* Dart coverage support - https://github.com/dart-lang/test/issues/1265
 
+- Configuration option - <https://github.com/dart-lang/test/issues/1361>
+- Dart coverage support - <https://github.com/dart-lang/test/issues/1265>
 
 ## Available options
 
@@ -194,14 +196,13 @@ All options are configurable in the SonarQube UI, via `sonar-project.properties`
 | `sonar.flutter.tests.reportPath`       | Comma separated list of file paths (wildcard not supported)              | `tests.output`       | The path to the test report JSON file.                                                                                                                                                                                                                                                              |
 | `sonar.flutter.coverage.reportPath`    | A file path                                                              | `coverage/lcov.info` | The path to the test coverage file in LCOV format.                                                                                                                                                                                                                                                  |
 
-
 ## Contributing
 
 Any help is welcome, and PRs will be greatly appreciated!
 
-Please read [CONTRIBUTING](https://github.com/insideapp-oss/sonar-flutter/blob/develop/CONTRIBUTING.md) for more information.
-
+Read the [contribution guide](CONTRIBUTING.md) for more information.
 
 ## License
 
-SonarQube Plugin for Flutter / Dart is released under the GNU LGPL v3 license. See the [LICENSE](https://github.com/insideapp-oss/sonar-flutter/blob/develop/LICENSE) file for more information.
+SonarQube Plugin for Flutter / Dart is released under the GNU LGPL v3 license.
+See [LICENSE.md](LICENSE.md) for more information.

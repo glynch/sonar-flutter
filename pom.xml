@@ -4,13 +4,13 @@
     
     <groupId>fr.insideapp.sonarqube</groupId>
     <artifactId>sonar-flutter</artifactId>
-    <version>0.5.2</version>
+    <version>0.6.0-riverfold-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
-    <name>Flutter SonarQube Plugin</name>
+    <name>Flutter SonarQube Plugin (Riverfold fork)</name>
     <description>Enables analysis of Dart and Flutter projects into SonarQube.</description>
-    <url>https://github.com/insideapp-oss/sonar-flutter/tree/master</url>
+    <url>https://github.com/glynch/sonar-flutter</url>
 
     <modules>
         <module>sonar-flutter-plugin</module>
@@ -19,8 +19,7 @@
 
     <inceptionYear>2020</inceptionYear>
     <organization>
-        <name>inside|app</name>
-        <url>https://github.com/insideapp-oss</url>
+        <name>Riverfold</name>
     </organization>
     <licenses>
         <license>
@@ -31,7 +30,8 @@
     </licenses>
 
     <issueManagement>
-        <url>https://github.com/insideapp-oss/sonar-flutter/issues</url>
+        <system>GitHub</system>
+        <url>https://github.com/glynch/sonar-flutter/issues</url>
     </issueManagement>
 
     <developers>
@@ -39,14 +39,26 @@
             <id>zippy1978</id>
             <name>Gilles Grousset</name>
             <organization>inside|app</organization>
+            <roles>
+                <role>Original author</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>glynch</id>
+            <name>Graham Lynch</name>
+            <email>3793160+glynch@users.noreply.github.com</email>
+            <organization>Riverfold</organization>
+            <roles>
+                <role>Maintainer</role>
+            </roles>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:insideapp-oss/sonar-flutter.git</connection>
-        <developerConnection>scm:git:git@github.com:insideapp-oss/sonar-flutter.git</developerConnection>
-        <url>https://github.com/insideapp-oss/sonar-flutter</url>
-      <tag>HEAD</tag>
+        <connection>scm:git:https://github.com/glynch/sonar-flutter.git</connection>
+        <developerConnection>scm:git:git@github.com:glynch/sonar-flutter.git</developerConnection>
+        <url>https://github.com/glynch/sonar-flutter</url>
+        <tag>HEAD</tag>
     </scm>
 
     <properties>

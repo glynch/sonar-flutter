@@ -3,7 +3,7 @@
 set -euo pipefail
 
 readonly SONARQUBE_IMAGE="${SONARQUBE_IMAGE:-sonarqube:26.10.0.133078-community}"
-readonly PLUGIN_JAR="${PLUGIN_JAR:-sonar-flutter-plugin/target/sonar-flutter-plugin-0.5.2.jar}"
+readonly PLUGIN_JAR="${PLUGIN_JAR:-sonar-flutter-plugin/target/sonar-flutter-plugin-0.6.0-riverfold-SNAPSHOT.jar}"
 readonly CONTAINER_NAME="sonar-flutter-smoke-$$"
 readonly STARTUP_TIMEOUT_SECONDS="${STARTUP_TIMEOUT_SECONDS:-180}"
 readonly ADMIN_CREDENTIALS="admin:admin"
